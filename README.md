@@ -1,0 +1,1 @@
+Given constant matrices A and C and variable matrix B such that AB = C, MatrixMath.solveForB(A, B, C) solves for matrix B.
