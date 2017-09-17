@@ -12,6 +12,7 @@ public class Tests {
 		public boolean test();
 	}
 	
+	// Current error is ~1e-6
 	public static void main(String[] args) {
 		Test[] tests = {
 			Tests::test1,
@@ -37,7 +38,6 @@ public class Tests {
 	public static boolean test(MatrixContainer a, MatrixContainer b, MatrixContainer c) {
 		MatrixMath.solveForB(a, b, c);
 		Matrix3f matA = toMatrix(a), matB = toMatrix(b), matC = toMatrix(c);
-		System.out.println(matA);
 		Matrix3f result = new Matrix3f();
 		matA.mul(matB, result);
 		MatrixContainer m1 = new JOMLMatrixContainer(matC);
@@ -45,6 +45,8 @@ public class Tests {
 		if (m1.equals(m2)) {
 			return true;
 		} else {
+			System.out.println(matC);
+			System.out.println(result);
 			return false;
 		}
 	}
@@ -92,7 +94,7 @@ public class Tests {
 		JOMLMatrixContainer a = new JOMLMatrixContainer();
 		JOMLMatrixContainer b = new JOMLMatrixContainer();
 		JOMLMatrixContainer c = new JOMLMatrixContainer();
-		a.matrix.rotateX((float) Math.PI).scale(12).rotateY((float) Math.PI).rotateZ((float) Math.PI);
+		a.matrix.identity().rotateX((float) Math.PI * (float) Math.random()).scale(12).rotateY((float) Math.PI * (float) Math.random()).rotateZ((float) Math.PI * (float) Math.random());
 		return test(a, b, c);
 	}
 	
@@ -101,7 +103,10 @@ public class Tests {
 		JOMLMatrixContainer a = new JOMLMatrixContainer();
 		JOMLMatrixContainer b = new JOMLMatrixContainer();
 		JOMLMatrixContainer c = new JOMLMatrixContainer();
-		a.matrix.rotateX((float) Math.PI).scale(12).rotateY((float) Math.PI).rotateZ((float) Math.PI);
+		a.matrix.rotateX((float) Math.PI);
+		a.matrix.scale(12);
+		a.matrix.rotateY((float) Math.PI);
+		a.matrix.rotateZ((float) Math.PI);
 		Matrix3f matB = new Matrix3f();
 		long t0 = System.nanoTime();
 		for (int i = 0; i < n; i++)
@@ -131,7 +136,7 @@ public class Tests {
 		
 		@Override
 		public void set(float a, float b, float c, float d, float e, float f) {
-			matrix.set(new float[]{ a, b, 0, c, d, 0, e, f, 0 });
+			matrix.set(new float[]{ a, b, 0, c, d, 0, e, f, 1 });
 		}
 
 		@Override
@@ -168,11 +173,16 @@ public class Tests {
 			return o instanceof MatrixContainer && equals((MatrixContainer) o);
 		}
 		
-		public boolean equals(MatrixContainer other) {
+		public float getError(MatrixContainer other) {
 			float error = Math.abs(getA() - other.getA()) + Math.abs(getB() - other.getB()) + Math.abs(getC() - other.getC()) +
 					Math.abs(getD() - other.getD()) + Math.abs(getE() - other.getE()) + Math.abs(getF() - other.getF());
+			return error;
+		}
+		
+		public boolean equals(MatrixContainer other) {
+			float error = getError(other);
 			System.out.println(error);
-			return error < 0.0000001f;
+			return error < 1e-7f;
 		}
 			
 	}
